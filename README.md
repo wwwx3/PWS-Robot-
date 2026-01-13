@@ -42,19 +42,19 @@ This allows the robot to:
 
 **System Architecture Diagram**
 
-![PWS Robot Hardware,Software Architecture](systemflow.png)
+![PWS Robot Hardware,Software Architecture](img/systemflow.png)
 
 ---
 
 **Path Planning & Field Boundary Detection**
 
-![PWS Autonomous Navigation Flow](pathplanningflow.png)
+![PWS Autonomous Navigation Flow](img/pathplanningflow.png)
 
 ---
 
 **Motor Control System**
 
-![PWS Motor Control Logic](motorcontrolflow.png)
+![PWS Motor Control Logic](img/motorcontrolflow.png)
 
 ---
 
