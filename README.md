@@ -71,7 +71,6 @@ The navigation system adapts to the farm’s geometry instead of forcing farms t
 
 ## **Team & Contributions**
 
----
 
 ### **Wirin Chinthammit (Plearn)**
 
