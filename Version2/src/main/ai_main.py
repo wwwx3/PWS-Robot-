@@ -1,74 +1,78 @@
-"""from roboflowoak import RoboflowOak
+from MotorModule import Motor
+from LaneDetectionModule import getLaneCurve
+import WebcamModule 
 import cv2
-import time
-import numpy as np
+#from buildhat import ColorDistanceSensor
+
+motor = Motor(2,3,4,17,22,27)
+
+def main() :
+
+    img = WebcamModule.getImg()
+    curveVal= getLaneCurve(img,1)
+
+    sen = 1.3 #sensitivity
+    maxVal = 0.3 #max speed 
+    if curveVal>0 :
+        sen=1.7
+        if curveVal<0.05: curveVal=0
+    else:
+        if curveVal>-0.08: curveVal=0
+    motor.move(0.20,-curveVal*sen,0.05) #might not need the minus
+    cv2.waitKey(1)
 
 if __name__ == '__main__':
-    # instantiating an object (rf) with the RoboflowOak module
-    rf = RoboflowOak(model="sugarcaneyumyum", confidence=0.05, overlap=0.5,
-    version="3", api_key="7kcjarqgJWng9pQWJi62", rgb=True,
-    depth=True, device=None, blocking=True)
-    # Running our model and displaying the video output with detections
-    while True:
-        t0 = time.time()
-        # The rf.detect() function runs the model inference
-        result, frame, raw_frame, depth = rf.detect(visualize=True)
-        predictions = result["predictions"]
-        #{
-        #    predictions:
-        #    [ {
-        #        x: (middle),
-        #        y:(middle),
-        #        width:
-        #        height:
-        #        depth: ###->
-        #        confidence:
-        #        class:
-        #        mask: {
-        #    ]
-        #}
-        #frame - frame after preprocs, with predictions
-        #raw_frame - original frame from your OAK
-        #depth - depth map for raw_frame, center-rectified to the center camera
+    while True :
+        main()
 
-        # timing: for benchmarking purposes
-        t = time.time()-t0
-        print("INFERENCE TIME IN MS ", 1/t)
-        print("PREDICTIONS ", [p.json() for p in predictions])
-
-        # setting parameters for depth calculation
-        max_depth = np.amax(depth)
-        cv2.imshow("depth", depth/max_depth)
-        # displaying the video feed as successive frames
-        cv2.imshow("frame", frame)
-
-        # how to close the OAK inference window / stop inference: CTRL+q or CTRL+c
-        if cv2.waitKey(1) == ord('q'):
-            break"""
-
-# New way (cuz the first one wouldnt work) 
-from roboflow import Roboflow
-import supervision as sv
+### adding in object detection from colordistance sensor from buildHAT 
+""" from MotorModule import Motor
+from LaneDetectionModule import getLaneCurve
+import WebcamModule
+from buildhat import ColorDistanceSensor
 import cv2
 
-rf = Roboflow(api_key="7kcjarqgJWng9pQWJi62")
-project = rf.workspace().project("sugarcaneyumyum")
-model = project.version(3).model
-#input here 
-result = model.predict("your_image.jpg", confidence=40, overlap=30).json()
+# Initialize Motor, Sensor, and Joystick Mode (Placeholder for actual joystick code)
+motor = Motor(2, 3, 4, 17, 22, 27)
+color_distance_sensor = ColorDistanceSensor('A')  # Adjust port as needed
 
-labels = [item["class"] for item in result["predictions"]]
+def activateJoystickMode():
+    # Code to enable joystick control (depends on your joystick setup)
+    print("Switched to Joystick Mode")
 
-detections = sv.Detections.from_roboflow(result)
+def main():
+    img = WebcamModule.getImg()
+    curveVal = getLaneCurve(img, 1)
 
-label_annotator = sv.LabelAnnotator()
-bounding_box_annotator = sv.BoxAnnotator()
-#input here
-image = cv2.imread("your_image.jpg")
+    # Get color and distance from sensor
+    color, distance = color_distance_sensor.get_color(), color_distance_sensor.get_distance()
+    print(f"Color: {color}, Distance: {distance} cm")  # For debugging purposes
 
-annotated_image = bounding_box_annotator.annotate(
-    scene=image, detections=detections)
-annotated_image = label_annotator.annotate(
-    scene=annotated_image, detections=detections, labels=labels)
+    # Stop motor and switch to joystick if a large, specific color object is detected
+    if color != 'white' and distance is not None and distance < 30:  # Detect non-path color (assuming path is white)
+        motor.move(0, 0, 0)  # Stop the motor
+        activateJoystickMode()  # Switch to joystick control
+        cv2.putText(img, "Object Detected - Switched to Joystick Mode", (50, 50),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+    else:
+        # Normal lane following behavior
+        sen = 1.3  # sensitivity
+        maxVal = 0.3  # max speed
+        if curveVal > 0:
+            sen = 1.7
+            if curveVal < 0.05:
+                curveVal = 0
+        else:
+            if curveVal > -0.08:
+                curveVal = 0
+        motor.move(0.20, -curveVal * sen, 0.05)  # Adjust as needed
+    
+    # Display output
+    cv2.imshow("Output", img)
+    cv2.waitKey(1)
 
-sv.plot_image(image=annotated_image, size=(16, 16))
+if __name__ == '__main__':
+    while True:
+        main()
+"""
+
